@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     for (const key of keys) {
       try {
         const buildId = key.replace("build:", "");
-        const buildJson = await kv.get(key, "json");
+        const buildJson = await kv.get(key);
         
         if (!buildJson) continue;
         

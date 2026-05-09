@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getBuild, getTotalStorageUsed, STORAGE_LIMIT, EXPIRY_MS, BuildRecord, saveBuild, incrementStorage } from "@/lib/kv";
+import { getBuild, getTotalStorageUsed, STORAGE_LIMIT, EXPIRY_MS, BuildRecord, saveBuild, incrementStorage, generateBuildId, generateDeleteToken } from "@/lib/kv";
 
 export const runtime = "edge";
 

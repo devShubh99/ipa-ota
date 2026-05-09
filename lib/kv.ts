@@ -20,7 +20,7 @@ export const STORAGE_LIMIT = 4.9 * 1024 * 1024 * 1024; // 4.9 GB
 export const EXPIRY_MS = 60 * 60 * 1000; // 60 minutes
 
 export async function getBuild(buildId: string): Promise<BuildRecord | null> {
-  return await kv.get(`build:${buildId}`, "json") as BuildRecord | null;
+  return await kv.get(`build:${buildId}`) as BuildRecord | null;
 }
 
 export async function saveBuild(build: BuildRecord): Promise<void> {
