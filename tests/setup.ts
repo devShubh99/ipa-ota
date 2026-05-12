@@ -12,6 +12,7 @@ const mockKv = {
   set: vi.fn().mockResolvedValue("OK"),
   get: vi.fn().mockResolvedValue(null),
   keys: vi.fn().mockResolvedValue([]),
+  incrby: vi.fn().mockResolvedValue(1),
   hset: vi.fn().mockResolvedValue(1),
   hget: vi.fn().mockResolvedValue(null),
   hgetall: vi.fn().mockResolvedValue(null),

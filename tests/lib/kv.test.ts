@@ -59,21 +59,13 @@ describe("KV Helpers", () => {
   });
 
   it("should increment storage", async () => {
-    (kv.get as any).mockResolvedValue(100);
     await incrementStorage(50);
-    expect(kv.set).toHaveBeenCalledWith("totalStorageUsed", 150);
+    expect(kv.incrby).toHaveBeenCalledWith("totalStorageUsed", 50);
   });
 
   it("should decrement storage", async () => {
-    (kv.get as any).mockResolvedValue(100);
     await decrementStorage(50);
-    expect(kv.set).toHaveBeenCalledWith("totalStorageUsed", 50);
-  });
-
-  it("should not decrement storage below zero", async () => {
-    (kv.get as any).mockResolvedValue(100);
-    await decrementStorage(150);
-    expect(kv.set).toHaveBeenCalledWith("totalStorageUsed", 0);
+    expect(kv.incrby).toHaveBeenCalledWith("totalStorageUsed", -50);
   });
 
   it("should list builds", async () => {

@@ -20,7 +20,7 @@ export const STORAGE_LIMIT = 4.9 * 1024 * 1024 * 1024; // 4.9 GB
 export const EXPIRY_MS = 60 * 60 * 1000; // 60 minutes
 
 export async function getBuild(buildId: string): Promise<BuildRecord | null> {
-  return await kv.get(`build:${buildId}`) as BuildRecord | null;
+  return (await kv.get(`build:${buildId}`)) as BuildRecord | null;
 }
 
 export async function saveBuild(build: BuildRecord): Promise<void> {
@@ -31,13 +31,15 @@ export async function saveBuild(build: BuildRecord): Promise<void> {
 export async function deleteBuild(buildId: string): Promise<void> {
   const build = await getBuild(buildId);
   if (!build) return;
-  
+
   await kv.del(`build:${buildId}`);
   await kv.del(`delete:${build.deleteToken}`);
 }
 
-export async function getBuildIdByDeleteToken(deleteToken: string): Promise<string | null> {
-  return await kv.get(`delete:${deleteToken}`) as string | null;
+export async function getBuildIdByDeleteToken(
+  deleteToken: string,
+): Promise<string | null> {
+  return (await kv.get(`delete:${deleteToken}`)) as string | null;
 }
 
 export async function getTotalStorageUsed(): Promise<number> {
@@ -46,13 +48,11 @@ export async function getTotalStorageUsed(): Promise<number> {
 }
 
 export async function incrementStorage(bytes: number): Promise<void> {
-  const current = await getTotalStorageUsed();
-  await kv.set("totalStorageUsed", current + bytes);
+  await kv.incrby("totalStorageUsed", bytes);
 }
 
 export async function decrementStorage(bytes: number): Promise<void> {
-  const current = await getTotalStorageUsed();
-  await kv.set("totalStorageUsed", Math.max(0, current - bytes));
+  await kv.incrby("totalStorageUsed", -bytes);
 }
 
 export async function listBuilds(): Promise<string[]> {
@@ -61,7 +61,8 @@ export async function listBuilds(): Promise<string[]> {
 }
 
 export function generateBuildId(): string {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
   for (let i = 0; i < 10; i++) {
     result += chars[Math.floor(Math.random() * chars.length)];
@@ -70,7 +71,8 @@ export function generateBuildId(): string {
 }
 
 export function generateDeleteToken(): string {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
   for (let i = 0; i < 16; i++) {
     result += chars[Math.floor(Math.random() * chars.length)];
