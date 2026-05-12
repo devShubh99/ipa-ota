@@ -59,13 +59,17 @@ describe("KV Helpers", () => {
   });
 
   it("should increment storage", async () => {
-    await incrementStorage(50);
+    vi.mocked(kv.incrby).mockResolvedValue(150);
+    const result = await incrementStorage(50);
     expect(kv.incrby).toHaveBeenCalledWith("totalStorageUsed", 50);
+    expect(result).toBe(150);
   });
 
   it("should decrement storage", async () => {
-    await decrementStorage(50);
+    vi.mocked(kv.incrby).mockResolvedValue(50);
+    const result = await decrementStorage(50);
     expect(kv.incrby).toHaveBeenCalledWith("totalStorageUsed", -50);
+    expect(result).toBe(50);
   });
 
   it("should list builds", async () => {

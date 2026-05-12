@@ -40,7 +40,7 @@ describe("IPA Parser", () => {
 
     (JSZip.loadAsync as any).mockResolvedValue(mockZip);
 
-    const dummyBuffer = Buffer.from("dummy zip");
+    const dummyBuffer = Uint8Array.from(Buffer.from("dummy zip")).buffer;
     const result = await parseIpa(dummyBuffer);
 
     expect(result.bundleId).toBe("com.example.app");
@@ -73,7 +73,9 @@ describe("IPA Parser", () => {
 
     (JSZip.loadAsync as any).mockResolvedValue(mockZip);
 
-    const result = await parseIpa(Buffer.from("dummy zip"));
+    const result = await parseIpa(
+      Uint8Array.from(Buffer.from("dummy zip")).buffer,
+    );
     expect(result.displayName).toBe("Fallback Name");
   });
 
@@ -84,9 +86,9 @@ describe("IPA Parser", () => {
 
     (JSZip.loadAsync as any).mockResolvedValue(mockZip);
 
-    await expect(parseIpa(Buffer.from("dummy zip"))).rejects.toThrow(
-      "No .app bundle found in IPA",
-    );
+    await expect(
+      parseIpa(Uint8Array.from(Buffer.from("dummy zip")).buffer),
+    ).rejects.toThrow("No .app bundle found in IPA");
   });
 
   it("should encode icon data correctly", () => {

@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getBuild, getTotalStorageUsed, STORAGE_LIMIT, EXPIRY_MS, BuildRecord, saveBuild, incrementStorage, generateBuildId, generateDeleteToken } from "@/lib/kv";
+import {
+  getBuild,
+  getTotalStorageUsed,
+  STORAGE_LIMIT,
+  EXPIRY_MS,
+  BuildRecord,
+  saveBuild,
+  incrementStorage,
+  decrementStorage,
+  generateBuildId,
+  generateDeleteToken,
+} from "@/lib/kv";
 
 export const runtime = "edge";
 
@@ -18,7 +29,7 @@ interface RegisterPayload {
 export async function POST(request: NextRequest) {
   try {
     const body: RegisterPayload = await request.json();
-    
+
     const {
       ipaBlobUrl,
       iconBlobUrl,
@@ -34,18 +45,25 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!ipaBlobUrl || !bundleId || !version || !displayName) {
       return NextResponse.json(
-        { error: "Missing required fields: ipaBlobUrl, bundleId, version, displayName" },
-        { status: 400 }
+        {
+          error:
+            "Missing required fields: ipaBlobUrl, bundleId, version, displayName",
+        },
+        { status: 400 },
       );
     }
 
     const totalSize = sizeIpa + sizeIcon + (sizeIcon57 || 0);
-    const currentUsed = await getTotalStorageUsed();
-    
-    if (currentUsed + totalSize > STORAGE_LIMIT) {
+
+    // Atomic storage increment and check
+    const newUsed = await incrementStorage(totalSize);
+    if (newUsed > STORAGE_LIMIT) {
+      await decrementStorage(totalSize); // Rollback
       return NextResponse.json(
-        { error: "Storage limit exceeded. Please delete some existing builds." },
-        { status: 413 }
+        {
+          error: "Storage limit exceeded. Please delete some existing builds.",
+        },
+        { status: 413 },
       );
     }
 
@@ -53,7 +71,7 @@ export async function POST(request: NextRequest) {
     const deleteToken = generateDeleteToken();
     const expiresAt = new Date(Date.now() + EXPIRY_MS).toISOString();
     const createdAt = new Date().toISOString();
-    
+
     const build: BuildRecord = {
       buildId,
       ipaBlobUrl,
@@ -71,7 +89,6 @@ export async function POST(request: NextRequest) {
     };
 
     await saveBuild(build);
-    await incrementStorage(totalSize);
 
     const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL || "localhost:3000";
     const protocol = baseUrl.includes("localhost") ? "http" : "https";

@@ -47,12 +47,12 @@ export async function getTotalStorageUsed(): Promise<number> {
   return (used as number) || 0;
 }
 
-export async function incrementStorage(bytes: number): Promise<void> {
-  await kv.incrby("totalStorageUsed", bytes);
+export async function incrementStorage(bytes: number): Promise<number> {
+  return await kv.incrby("totalStorageUsed", bytes);
 }
 
-export async function decrementStorage(bytes: number): Promise<void> {
-  await kv.incrby("totalStorageUsed", -bytes);
+export async function decrementStorage(bytes: number): Promise<number> {
+  return await kv.incrby("totalStorageUsed", -bytes);
 }
 
 export async function listBuilds(): Promise<string[]> {
