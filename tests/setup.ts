@@ -1,16 +1,17 @@
 // tests/setup.ts
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 // Mock Vercel Blob
-vi.mock('@vercel/blob', () => ({
-  put: vi.fn().mockResolvedValue({ url: 'https://blob.example.com/test.ipa' }),
+vi.mock("@vercel/blob", () => ({
+  put: vi.fn().mockResolvedValue({ url: "https://blob.example.com/test.ipa" }),
   del: vi.fn().mockResolvedValue({}),
 }));
 
 // Mock Vercel KV
-vi.mock('@vercel/kv', () => ({
-  set: vi.fn().mockResolvedValue('OK'),
+vi.mock("@vercel/kv", () => ({
+  set: vi.fn().mockResolvedValue("OK"),
   get: vi.fn().mockResolvedValue(null),
+  keys: vi.fn().mockResolvedValue([]),
   hset: vi.fn().mockResolvedValue(1),
   hget: vi.fn().mockResolvedValue(null),
   hgetall: vi.fn().mockResolvedValue(null),

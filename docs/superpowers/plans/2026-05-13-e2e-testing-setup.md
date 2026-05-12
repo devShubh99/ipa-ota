@@ -136,7 +136,7 @@ describe('KV Helpers', () => {
   it('should save build metadata', async () => {
     const build = { id: 'test-id', bundleId: 'com.test', version: '1.0', name: 'Test' } as any;
     await saveBuild(build);
-    expect(kv.hset).toHaveBeenCalled();
+    expect(kv.set).toHaveBeenCalled();
   });
 });
 ```
