@@ -1,5 +1,9 @@
 // tests/setup.ts
-import { vi } from "vitest";
+import { vi, afterEach } from "vitest";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 // Mock Vercel Blob
 vi.mock("@vercel/blob", () => ({

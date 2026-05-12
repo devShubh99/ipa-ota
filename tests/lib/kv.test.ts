@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   saveBuild,
   getBuild,
@@ -16,6 +16,10 @@ import { kv } from "@vercel/kv";
 describe("KV Helpers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   const mockBuild: BuildRecord = {
@@ -45,14 +49,14 @@ describe("KV Helpers", () => {
   });
 
   it("should get build metadata", async () => {
-    (kv.get as any).mockResolvedValue(mockBuild);
+    vi.mocked(kv.get).mockResolvedValue(mockBuild);
     const result = await getBuild("test-id");
     expect(kv.get).toHaveBeenCalledWith("build:test-id");
     expect(result).toEqual(mockBuild);
   });
 
   it("should delete build metadata", async () => {
-    (kv.get as any).mockResolvedValue(mockBuild);
+    vi.mocked(kv.get).mockResolvedValue(mockBuild);
     await deleteBuild("test-id");
     expect(kv.del).toHaveBeenCalledWith("build:test-id");
     expect(kv.del).toHaveBeenCalledWith(`delete:${mockBuild.deleteToken}`);
@@ -73,14 +77,14 @@ describe("KV Helpers", () => {
   });
 
   it("should list builds", async () => {
-    (kv.keys as any).mockResolvedValue(["build:id1", "build:id2"]);
+    vi.mocked(kv.keys).mockResolvedValue(["build:id1", "build:id2"]);
     const result = await listBuilds();
     expect(kv.keys).toHaveBeenCalledWith("build:*");
     expect(result).toEqual(["id1", "id2"]);
   });
 
   it("should get build ID by delete token", async () => {
-    (kv.get as any).mockResolvedValue("test-id");
+    vi.mocked(kv.get).mockResolvedValue("test-id");
     const result = await getBuildIdByDeleteToken("delete-token");
     expect(kv.get).toHaveBeenCalledWith("delete:delete-token");
     expect(result).toBe("test-id");

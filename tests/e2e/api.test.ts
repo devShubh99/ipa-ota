@@ -1,10 +1,14 @@
 // tests/e2e/api.test.ts
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { kv } from "@vercel/kv";
 
 describe("API E2E Flow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("should verify register endpoint returns 200 and stores build", async () => {

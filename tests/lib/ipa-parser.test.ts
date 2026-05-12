@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { parseIpa, encodeIcon } from "@/lib/ipa-parser";
 import JSZip from "jszip";
 
@@ -13,6 +13,10 @@ vi.mock("jszip", () => {
 describe("IPA Parser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("should extract bundle ID, version, and display name from mock plist", async () => {
@@ -38,7 +42,7 @@ describe("IPA Parser", () => {
       },
     };
 
-    (JSZip.loadAsync as any).mockResolvedValue(mockZip);
+    vi.mocked(JSZip.loadAsync).mockResolvedValue(mockZip);
 
     const dummyBuffer = Uint8Array.from(Buffer.from("dummy zip")).buffer;
     const result = await parseIpa(dummyBuffer);
@@ -71,7 +75,7 @@ describe("IPA Parser", () => {
       },
     };
 
-    (JSZip.loadAsync as any).mockResolvedValue(mockZip);
+    vi.mocked(JSZip.loadAsync).mockResolvedValue(mockZip);
 
     const result = await parseIpa(
       Uint8Array.from(Buffer.from("dummy zip")).buffer,
@@ -84,7 +88,7 @@ describe("IPA Parser", () => {
       files: {},
     };
 
-    (JSZip.loadAsync as any).mockResolvedValue(mockZip);
+    vi.mocked(JSZip.loadAsync).mockResolvedValue(mockZip);
 
     await expect(
       parseIpa(Uint8Array.from(Buffer.from("dummy zip")).buffer),
