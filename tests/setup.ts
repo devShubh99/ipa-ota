@@ -8,7 +8,7 @@ vi.mock("@vercel/blob", () => ({
 }));
 
 // Mock Vercel KV
-vi.mock("@vercel/kv", () => ({
+const mockKv = {
   set: vi.fn().mockResolvedValue("OK"),
   get: vi.fn().mockResolvedValue(null),
   keys: vi.fn().mockResolvedValue([]),
@@ -21,4 +21,8 @@ vi.mock("@vercel/kv", () => ({
   lrange: vi.fn().mockResolvedValue([]),
   lrem: vi.fn().mockResolvedValue(1),
   hincrby: vi.fn().mockResolvedValue(1),
+};
+
+vi.mock("@vercel/kv", () => ({
+  kv: mockKv,
 }));

@@ -22,7 +22,7 @@ export async function parseIpa(buffer: ArrayBuffer): Promise<AppInfo> {
     throw new Error("No .app bundle found in IPA");
   }
 
-  const appPath = appDir.replace("/", "");
+  const appPath = appDir.replace(/\/$/, "");
   const infoPlistPath = `${appPath}/Info.plist`;
 
   if (!zip.files[infoPlistPath]) {
@@ -32,9 +32,12 @@ export async function parseIpa(buffer: ArrayBuffer): Promise<AppInfo> {
   const plistContent = await zip.files[infoPlistPath].async("text");
   const parsed = parsePlist(plistContent);
 
-  if (parsed.CFBundleIdentifier) info.bundleId = String(parsed.CFBundleIdentifier);
-  if (parsed.CFBundleShortVersionString) info.version = String(parsed.CFBundleShortVersionString);
-  if (parsed.CFBundleDisplayName) info.displayName = String(parsed.CFBundleDisplayName);
+  if (parsed.CFBundleIdentifier)
+    info.bundleId = String(parsed.CFBundleIdentifier);
+  if (parsed.CFBundleShortVersionString)
+    info.version = String(parsed.CFBundleShortVersionString);
+  if (parsed.CFBundleDisplayName)
+    info.displayName = String(parsed.CFBundleDisplayName);
   else if (parsed.CFBundleName) info.displayName = String(parsed.CFBundleName);
 
   const iconData = await extractIcon(zip, appPath);
@@ -53,7 +56,12 @@ function parsePlist(xml: string): Record<string, unknown> {
     /<key>(CFBundleName)<\/key>\s*<string>([^<]+)<\/string>/,
   ];
 
-  const keys = ["CFBundleIdentifier", "CFBundleShortVersionString", "CFBundleDisplayName", "CFBundleName"];
+  const keys = [
+    "CFBundleIdentifier",
+    "CFBundleShortVersionString",
+    "CFBundleDisplayName",
+    "CFBundleName",
+  ];
 
   for (let i = 0; i < patterns.length; i++) {
     const match = xml.match(patterns[i]);
@@ -65,7 +73,10 @@ function parsePlist(xml: string): Record<string, unknown> {
   return result;
 }
 
-async function extractIcon(zip: JSZip, appPath: string): Promise<Uint8Array | null> {
+async function extractIcon(
+  zip: JSZip,
+  appPath: string,
+): Promise<Uint8Array | null> {
   const iconNames = [
     "AppIcon60x60@2x.png",
     "AppIcon60x60@3x.png",
