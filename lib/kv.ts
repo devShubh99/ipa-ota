@@ -61,21 +61,9 @@ export async function listBuilds(): Promise<string[]> {
 }
 
 export function generateBuildId(): string {
-  const chars =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let result = "";
-  for (let i = 0; i < 10; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
+  return crypto.randomUUID().slice(0, 10);
 }
 
 export function generateDeleteToken(): string {
-  const chars =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let result = "";
-  for (let i = 0; i < 16; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
+  return crypto.randomUUID().slice(0, 16);
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { kv } from "@vercel/kv";
-import { del } from "@vercel/blob";
+import { listBuilds, getBuild, decrementStorage, deleteBuild } from "@/lib/kv";
+import { deleteBlob } from "@/lib/blob";
 
 export const runtime = "nodejs";
 
@@ -10,53 +10,28 @@ export async function GET(request: NextRequest) {
   let errorCount = 0;
 
   try {
-    const keys = await kv.keys("build:*");
-    
-    for (const key of keys) {
+    const buildIds = await listBuilds();
+
+    for (const buildId of buildIds) {
       try {
-        const buildId = key.replace("build:", "");
-        const buildJson = await kv.get(key);
-        
-        if (!buildJson) continue;
-        
-        const build = buildJson as {
-          expiresAt: string;
-          ipaBlobUrl: string;
-          iconBlobUrl: string;
-          icon57BlobUrl?: string;
-          sizeIpa: number;
-          sizeIcon: number;
-          sizeIcon57?: number;
-          deleteToken: string;
-        };
-        
+        const build = await getBuild(buildId);
+        if (!build) continue;
+
         const expiresAt = new Date(build.expiresAt);
-        
+
         if (expiresAt < now) {
-          // Delete blobs
-          try {
-            if (build.ipaBlobUrl) await del(build.ipaBlobUrl);
-            if (build.iconBlobUrl) await del(build.iconBlobUrl);
-            if (build.icon57BlobUrl) await del(build.icon57BlobUrl);
-          } catch (e) {
-            console.error(`Failed to delete blobs for ${buildId}:`, e);
-          }
+          if (build.ipaBlobUrl) await deleteBlob(build.ipaBlobUrl);
+          if (build.iconBlobUrl) await deleteBlob(build.iconBlobUrl);
+          if (build.icon57BlobUrl) await deleteBlob(build.icon57BlobUrl);
 
-          // Decrement storage
           const totalSize = build.sizeIpa + build.sizeIcon + (build.sizeIcon57 || 0);
-          const currentUsed = await kv.get<number>("totalStorageUsed") || 0;
-          await kv.set("totalStorageUsed", Math.max(0, currentUsed - totalSize));
-
-          // Delete KV keys
-          await kv.del(key);
-          if (build.deleteToken) {
-            await kv.del(`delete:${build.deleteToken}`);
-          }
+          await decrementStorage(totalSize);
+          await deleteBuild(buildId);
 
           deletedCount++;
         }
       } catch (e) {
-        console.error(`Failed to process ${key}:`, e);
+        console.error(`Failed to process build ${buildId}:`, e);
         errorCount++;
       }
     }
